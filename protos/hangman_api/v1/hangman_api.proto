@@ -1,0 +1,69 @@
+syntax = "proto3";
+package hangman_api.v1;
+
+// Option go_package overrides package in the package name of the generated code
+
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+
+// TagBodyDetails detail for tag mail body action
+message CreateGameRequest {
+}
+
+message UpdateGameRequest {
+  string id = 1 [(validate.rules).string.min_len = 0];
+  string guess = 2 [(validate.rules).string.min_len = 0];
+}
+
+message GameRequest {
+  string id = 1 [(validate.rules).string.min_len = 0];
+}
+
+message GameResponse {
+  string id = 1 [(validate.rules).string.min_len = 0];
+  string word = 2 [(validate.rules).string.min_len = 0];
+  int32 guessesLeft = 3 [(validate.rules).int32.gte = 0];
+  repeated string wrongGuesses = 4 [(validate.rules).repeated.min_items = 0];
+  string state = 5 [(validate.rules).string.min_len = 0];
+}
+
+message DeleteGameRequest {
+  string id = 1 [(validate.rules).string.min_len = 0];
+}
+
+message DeleteGameResponse {
+  bool deleted = 1;
+}
+// HangmanAPI encapsulates all the RPCs that are externally visible to the user
+service HangmanAPI {
+
+  // GetGame returns the timeline of policy violations
+  rpc GetGame(GameRequest) returns (GameResponse) {
+    option (google.api.http) = {
+      get : "/api/v1/game/{id=*}"
+    };
+  }
+
+  // CreateGame creates a new game and returns the id
+  rpc CreateGame(CreateGameRequest) returns (GameResponse) {
+    option (google.api.http) = {
+      post : "/api/v1/games",
+      body : "*"
+    };
+  }
+
+  // UpdateGameGuesses updates the games with guesses
+  rpc UpdateGameGuesses(UpdateGameRequest) returns (GameResponse) {
+    option (google.api.http) = {
+      patch : "/api/v1/games/{id}/guesses",
+      body : "*"
+    };
+  }
+
+  // DeleteGame deletes the game by id
+  rpc DeleteGame(DeleteGameRequest) returns (DeleteGameResponse) {
+    option (google.api.http) = {
+      delete : "/api/v1/games/{id}"
+    };
+  }
+}
